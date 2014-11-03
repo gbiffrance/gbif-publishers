@@ -1,0 +1,4 @@
+name = GBIF Publishers (dev-version)
+description = Creates your GBIF node  publishers information page on Drupal (http://www.gbif.org)
+core = 7.x
+configure = admin/config/content/gbif_publishers

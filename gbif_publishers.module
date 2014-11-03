@@ -1,0 +1,265 @@
+<?php
+
+define('JSON_DIRECTORY',  drupal_get_path('module', 'gbif_publishers') . '/json/');
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param path
+ *   Which path of the site we're using to display help
+ * @param arg
+ *   Array that holds the current path as returned from arg() function
+ */
+
+function gbif_publishers_help($path,$arg){
+ $msg = "Creates a page with the list of datapublishers endorsed by your node and";
+ $msg .= " creates a page for each datapublishers embedding charts and metrics relative to their contribution to GBIF.";
+  switch ($path) {
+    case "admin/help#gbif_publishers":
+      return '<p>' . t($msg) . '</p>';
+      break;
+  }
+}
+
+function gbif_publishers_install (){
+    $menu = array(
+        'menu_name' => 'gbif-publishers-menu',
+        'title' => 'GBIF Providers menu',
+        'description' => 'Provides the list of gbif publishers'
+    );
+
+    menu_save($menu);
+    cache_clear_all('*', 'cache_menu', TRUE);
+
+    drupal_set_message($message = t('The module was successfully installed. '), $type = 'status');
+}
+
+// Comments are for dev. version
+/*function gbif_publishers_disable()
+{
+    $menu = array(
+        'menu_name' => 'gbif-publishers-menu',
+        'title' => 'GBIF Providers menu',
+        'description' => 'Provides the list of gbif publishers'
+    );
+
+    menu_delete($menu);
+    cache_clear_all('*', 'cache_menu', TRUE);
+    drupal_set_message($message = t('The module was successfully disabled '), $type = 'status');
+}*/
+
+/**
+ * Implements hook_menu().
+ */
+function gbif_publishers_menu() {
+ 
+  $json = file_get_contents( JSON_DIRECTORY . 'org.json' );
+  $org =  json_decode($json);
+
+  $items['gbif_publishers'] = array(
+    'title' => 'Data publishers list',
+    'description' => '',
+    'page callback' => '_gbif_publishers_page',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+    'menu_name'=> 'gbif-publishers-menu',
+  );
+
+
+  foreach($org->results as $k=>$v)
+  {
+    $routerUrl = 'gbif_publishers/display/' .  $v->key;
+
+    $items[$routerUrl] = array(
+         'title' => $v->title,
+         'page callback' => '_gbif_publishers_display',
+         'page arguments' => array(2),
+         'access callback' => TRUE,
+         'menu_name'=> 'gbif-publishers-menu',
+      );
+  }
+
+  return $items;
+}
+
+/*
+ * Implementation of hook_library()
+ */
+function gbif_publishers_library()
+{
+   $libraries['jQuery'] = array(
+    'title' => 'jQuery',
+    'website' => 'http://www.jquery.com',
+    'version' => '1.11.0',
+    'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/jquery-1.11.0.min.js' => array(
+      'type' => 'file',
+      'scope' => 'footer',   
+     ),
+    ),
+  );
+
+  $libraries['Highcharts'] = array(
+    'title' => 'Highcharts',
+    'website' => 'http://www.highcharts.com',
+    'version' => '4.0.4',
+    'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/highcharts.js' => array(
+     'type' => 'file', 
+     'scope' => 'footer',
+      ),
+     ),
+  );
+
+  $libraries['kingdom_charts'] = array(
+    'title' => 'kingdom_charts',
+    'website' => 'http://www.gbif.fr',
+    'version' => '0.1',
+       'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/chart.js' => array(
+       'type' => 'file',
+      ),
+     ),
+    'dependencies' => array(
+      array('gbif_publishers', 'Highcharts'),
+      array('gbif_publishers', 'jQuery'),
+    ),
+  );
+ 
+ $libraries['custom_css'] = array(
+  'css' => array(
+      drupal_get_path('module', 'gbif_publishers') . '/css/custom.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+   ));
+
+
+ return $libraries;
+}
+
+/**
+ * Page callback for gbif_publishers menu entry.
+ * 
+ */
+function _gbif_publishers_page() {
+  $base_content = t('GBIF Publishers module provides a list of your node datapublishers and a page for each datapublisher contribution');
+  
+  return '<div>' . $base_content . '</div>';
+}
+
+function _gbif_publishers_display($uuid)
+{
+ $stat  =  _gbif_publishers_get_publisher_stat($uuid);
+ $table =   _gbif_publishers_html_table($stat["institution"],$stat["script_exec_date"],$uuid);
+
+ return _gbif_publishers_provider_info($table);
+}
+
+function _gbif_publishers_get_publisher_stat($uuid)
+{
+  $json = file_get_contents(JSON_DIRECTORY . 'stats.json' );
+  $stats =  json_decode($json);
+  $exec_date = $stats->script_exec_date;
+
+  foreach($stats->datasets_list as $val){
+
+   if  ($val->institution_uuid==$uuid)
+   {
+      return array("institution"=>$val,"script_exec_date"=>$exec_date);
+   }
+  }
+}
+
+function _gbif_publishers_html_table($stat,$exec_date,$uuid)
+{
+     drupal_add_library('gbif_publishers', 'jQuery', FALSE);
+     drupal_add_library('gbif_publishers', 'Highcharts', FALSE);
+     drupal_add_library('gbif_publishers', 'kingdom_charts', FALSE);
+     drupal_add_library('gbif_publishers', 'custom_css', FALSE);
+
+
+    $cpt_Geo = 0;
+    $cpt_Occ = 0;
+    $institution_name = $stat->institution_name;
+    $html = '<span class="hidden provider_uuid">'. $uuid .'</span>';
+    $html .= "<span class='small'>(Last update : ".$exec_date.") </span><br /> ";
+    $html .= '<table class="table stat-provider table-striped  table-bordered">
+		  <thead>
+		    <tr>
+		      <th>Dataset</th>
+		      <th class="data-number">Metrics</th>
+		      <th>Downloads</th>
+		    </tr>
+		  </thead>
+		  <tbody>';
+	    
+    $stat_provider = array("kingdom"=>array(),"basisOfRecord"=>array());
+    
+    foreach($stat->datasets_list as $ds)
+    { 
+   
+	
+	  $ds_url = "http://www.gbif.org/dataset/".$ds->key;
+          $ds_search_url ="http://www.gbif.org/occurrence/search?datasetKey=".$ds->key;
+	  $html .= "<tr>";
+	  $html .= "<td><b><a target='_blank' class='ds-title' href='".$ds_url."'>".$ds->title."</a></b><br />";
+	  $html .= "<span>". ucfirst(strtolower($ds->type))  ."</span><br /><br />";
+	  if ( (isset($ds->dwc_url) && !(empty($ds->dwc_url)))  ) $html .= "<a class='label' href='". $ds->dwc_url ."'>Darwin Core Archive <i class='icon-download-alt'></i></a></td>";
+	  
+
+
+	  $html .= (isset($ds->total) && !(empty($ds->total))) ? "<td><b>". $ds->total  ."</b>": "<td>";    
+	  $html .=  (isset($ds->percent_geo) && !(empty($ds->percent_geo))) ? "<br /><span>Georeferenced ".$ds->percent_geo." % </span>": "";
+	  $html .= "<br /><span><a target='_blank' href=".$ds_search_url.">View <i class='icon-th-list'></i></a></span>";
+	  
+	  // Computes stats (Kingdom / BasisOfRecord)  for Publisher
+	  if ($ds->type == "OCCURRENCE")
+	  {
+		  foreach($ds->basisOfRecord as $val)
+		  {
+		    foreach($val as $k=>$v)
+		    {
+				$stat_provider["basisOfRecord"][$k] = (array_key_exists($k,$stat_provider["basisOfRecord"])) ? $stat_provider["basisOfRecord"][$k] + $v  : $v;
+		    }
+		  }
+	      
+		  if (isset($ds->kingdom) && count($ds->kingdom)!=0) 
+		  {
+		      foreach($ds->kingdom as $val)
+		      {
+			foreach($val as $k=>$v)
+			{
+			    $stat_provider["kingdom"][$k] = (array_key_exists($k,$stat_provider["kingdom"])) ? $stat_provider["kingdom"][$k] + $v  : $v;
+			}
+		      }
+		  }
+		 
+	
+	   }
+	$cpt_Geo = (isset($ds->georef) && !(empty($ds->georef))) ? $cpt_Geo + $ds->georef : $cpt_Geo;
+	$cpt_Occ = (isset($ds->total) && !(empty($ds->total))) ? $cpt_Occ + $ds->total : $cpt_Occ;  
+	
+	$html .=  (isset($ds->download) && !(empty($ds->download))) ?  '<td><b>'.$ds->download.'</b><br><a target="_blank" href="'.$ds_url.'/'.'activity"><span class="small">(See download details)</span></a></td>' : '<td>-</td>' ;
+	$html .= "</tr>";
+      
+    }
+    
+    $html .=  '</tbody></table><br />';
+    $html .=  '<span class="stat_provider hidden">'.json_encode($stat_provider).'</span>';
+
+    return array("stats_html"=>$html,"total_geo"=>$cpt_Geo,"total_occ"=>$cpt_Occ,"institution_name"=>$institution_name);
+}
+  
+function _gbif_publishers_provider_info($table)
+{
+    $cpt_geo	= $table["total_geo"]  ;
+    $cpt_occ = $table["total_occ"];
+    
+    $percent_geo =  round((($cpt_geo / $cpt_occ) * 100),2) ;
+    	    
+    $html = $table["stats_html"];
+    $html .= '<div id="kingdom-chart" style="min-width: 500px; height: 400px; max-width: 300px; margin: 0 auto"></div>';
+    $html .= '<div id="bor-chart"><b>Basis of records : </b></div></div></div> ';
+    
+    return $html;
+}
