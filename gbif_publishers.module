@@ -76,7 +76,14 @@ function gbif_publishers_menu() {
     'access arguments' => array('access administration pages'),
     'type' => MENU_NORMAL_ITEM,
   );
-  
+   
+   // Admin menu item to generate JSON files from GBIF API 
+  $items['gbif_publishers/controlled/generate_data'] = array(
+    'title' => 'Generate JSON files from API',
+    'page callback' => 'gbif_publishers_form_generate',
+    'access arguments' => array('access protected gbif publishers'),
+    'file' => 'form_generate_data.inc',
+   );
 
   foreach($org->results as $k=>$v)
   {
@@ -114,6 +121,18 @@ function gbif_publisher_form($form, &$form_state) {
   return system_settings_form($form);
 }
 
+/**
+ * Implements hook_permission().
+ *
+ */
+function gbif_publishers_permission() {
+  return array(
+    'access protected gbif publishers' => array(
+      'title' => t('Generate GBIF publishers JSON files through Drupal interface.'),
+    ),
+  );
+
+}
 
 /*
  * Implementation of hook_library()

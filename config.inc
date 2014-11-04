@@ -1,5 +1,5 @@
 <?php
-//$gbiffr_key = "da44cd31-5901-4687-a106-6d1c7734ee3a";
+$gbiffr_key = "da44cd31-5901-4687-a106-6d1c7734ee3a";
 
 /* JSON PATH (depending on your Drupal installation)*/
 $jsonDir = '/var/www/drupal/sites/all/modules/custom/gbif_publishers/json/';

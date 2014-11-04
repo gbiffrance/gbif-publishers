@@ -1,4 +1,5 @@
 <?php
+include_once("config.inc");
 define("API","http://api.gbif.org/v1/");
 
 function nodeStats($node)
