@@ -89,8 +89,8 @@ function gbif_publishers_menu() {
  */
 function gbif_publishers_library()
 {
-   $libraries['jQuery'] = array(
-    'title' => 'jQuery',
+   $libraries['jquery'] = array(
+    'title' => 'jquery',
     'website' => 'http://www.jquery.com',
     'version' => '1.11.0',
     'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/jquery-1.11.0.min.js' => array(
@@ -100,8 +100,8 @@ function gbif_publishers_library()
     ),
   );
 
-  $libraries['Highcharts'] = array(
-    'title' => 'Highcharts',
+  $libraries['highcharts'] = array(
+    'title' => 'highcharts',
     'website' => 'http://www.highcharts.com',
     'version' => '4.0.4',
     'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/highcharts.js' => array(
@@ -117,11 +117,12 @@ function gbif_publishers_library()
     'version' => '0.1',
        'js' => array( drupal_get_path('module', 'gbif_publishers') . '/js/chart.js' => array(
        'type' => 'file',
+       'scope'=> 'footer',
       ),
      ),
     'dependencies' => array(
-      array('gbif_publishers', 'Highcharts'),
-      array('gbif_publishers', 'jQuery'),
+      array('gbif_publishers', 'highcharts'),
+      array('gbif_publishers', 'jquery'),
     ),
   );
  
@@ -133,6 +134,46 @@ function gbif_publishers_library()
       ),
    ));
 
+ $libraries['leaflet'] = array(
+    'title' => 'leaflet',
+    'website' => 'http://leafletjs.com',
+    'version' => '0.7',
+    'js' => array(
+      drupal_get_path('module', 'gbif_publishers') . '/js/leaflet.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+      ), 
+      drupal_get_path('module', 'gbif_publishers') . '/js/Leaflet.fullscreen.min.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+      ),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'gbif_publishers') . '/css/leaflet.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+      drupal_get_path('module', 'gbif_publishers') . '/css/leaflet.fullscreen.css' => array(
+        'type' => 'file',
+        'media' => 'all',
+      ),
+     ),
+  );
+
+ $libraries['gbif_map'] = array(
+    'title' => 'gbif_map',
+    'website' => 'http://www.gbif.fr',
+    'version' => '0.1',
+    'js' => array(
+      drupal_get_path('module', 'gbif_publishers') . '/js/map_publisher.js' => array(
+        'type' => 'file',
+        'scope' => 'footer',
+      ),
+     ),
+    'dependencies' => array(
+      array('gbif_publishers', 'leaflet'),
+    ),
+    );
 
  return $libraries;
 }
@@ -172,11 +213,12 @@ function _gbif_publishers_get_publisher_stat($uuid)
 
 function _gbif_publishers_html_table($stat,$exec_date,$uuid)
 {
-     drupal_add_library('gbif_publishers', 'jQuery', FALSE);
-     drupal_add_library('gbif_publishers', 'Highcharts', FALSE);
+     drupal_add_library('gbif_publishers', 'jquery', FALSE);
+     drupal_add_library('gbif_publishers', 'highcharts', FALSE);
      drupal_add_library('gbif_publishers', 'kingdom_charts', FALSE);
      drupal_add_library('gbif_publishers', 'custom_css', FALSE);
-
+     drupal_add_library('gbif_publishers', 'leaflet', FALSE);
+     drupal_add_library('gbif_publishers', 'gbif_map', FALSE);
 
     $cpt_Geo = 0;
     $cpt_Occ = 0;
@@ -260,6 +302,7 @@ function _gbif_publishers_provider_info($table)
     $html = $table["stats_html"];
     $html .= '<div id="kingdom-chart" style="min-width: 500px; height: 400px; max-width: 300px; margin: 0 auto"></div>';
     $html .= '<div id="bor-chart"><b>Basis of records : </b></div></div></div> ';
-    
+    $html .= '<div id="map" style="width: 748px; height: 400px"></div>';
+ 
     return $html;
 }
