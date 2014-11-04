@@ -8,7 +8,7 @@
 	switch(prop)
         {
 	case "Other":
-		this.Autres = value;
+		this.Other = value;
 		return;
         case "Viruses":
 		this.Virus = value;
@@ -80,7 +80,7 @@
 	      plotShadow: false
 	  },
 	  title: {
-	      text: 'Distribution des occurrences par royaume'
+	      text: 'Distribution of occurrences per kingdoms'
 	  },
 	  tooltip: {
 	      pointFormat: '{point.name}: <b>{point.y:f} occurrences</b>'

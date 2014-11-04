@@ -1,5 +1,4 @@
 <?php
-include_once("config.php");	      
 define("API","http://api.gbif.org/v1/");
 
 function nodeStats($node)
@@ -185,6 +184,3 @@ function getDatasetMetrics($dataset)
   }
   return $metrics;
 }
-
-
-?>

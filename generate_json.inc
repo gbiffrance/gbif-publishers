@@ -3,7 +3,7 @@ include_once("config.php");
 include_once("stats.php");
 
 
-// Generate a JSON file containing all publishers stats (TODO: Add to task planner [CRON])
+// Generate a JSON file containing all publishers stats
 
 // Get all organizations endorsed by GBIF France
 // Loop through all organizations
@@ -16,9 +16,6 @@ include_once("stats.php");
 
 $exec_date = date("d/m/Y");
 
-
-echo "This script will generate two JSON files (1 for endorsed organization and 1 for datasets stats for each org.)  \n\n";
-echo "1st STEP : Fetch all organization endorsed by GBIF France ... \n";
 $institutions = getInstitutions($gbiffr_key);
 write_file($organizationFile,$institutions);
 
@@ -45,13 +42,9 @@ foreach($objInstitutions->results as $k=>$v)
 
    array_push($datasets_list["datasets_list"],$institution);    
    $i++;
-   show_status($i, $total_element);
 }
 
 
 $json = json_encode($datasets_list);
 
 write_file($datasetFile,$json);
-
-
-?>
