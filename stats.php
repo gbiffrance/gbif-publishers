@@ -1,5 +1,5 @@
 <?php
-include_once("config.inc");
+include_once("config.php");	      
 define("API","http://api.gbif.org/v1/");
 
 function nodeStats($node)
@@ -31,7 +31,7 @@ function nodeStats($node)
 //TODO: Make changes so endOfRecords is verified as True (for the moment limit parameter is arbitrary set to 1000 which is enough)
 function getInstitutions($uuid)
 {
-  $url = API."node/".$uuid."/organization?limit=2";
+  $url = API."node/".$uuid."/organization?limit=1000";
   $output = getCurl($url);
   
   return $output;
@@ -185,3 +185,6 @@ function getDatasetMetrics($dataset)
   }
   return $metrics;
 }
+
+
+?>

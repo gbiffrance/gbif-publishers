@@ -37,7 +37,7 @@ function gbif_publishers_install (){
 }
 
 // Comments are for dev. version
-/*function gbif_publishers_disable()
+function gbif_publishers_disable()
 {
     $menu = array(
         'menu_name' => 'gbif-publishers-menu',
@@ -48,7 +48,7 @@ function gbif_publishers_install (){
     menu_delete($menu);
     cache_clear_all('*', 'cache_menu', TRUE);
     drupal_set_message($message = t('The module was successfully disabled '), $type = 'status');
-}*/
+}
 
 /**
  * Implements hook_menu().
@@ -76,14 +76,6 @@ function gbif_publishers_menu() {
     'access arguments' => array('access administration pages'),
     'type' => MENU_NORMAL_ITEM,
   );
-   
-   // Admin menu item to generate JSON files from GBIF API 
-  $items['gbif_publishers/controlled/generate_data'] = array(
-    'title' => 'Generate JSON files from API',
-    'page callback' => 'gbif_publishers_form_generate',
-    'access arguments' => array('access protected gbif publishers'),
-    'file' => 'form_generate_data.inc',
-   );
 
   foreach($org->results as $k=>$v)
   {
@@ -119,19 +111,6 @@ function gbif_publisher_form($form, &$form_state) {
   );
 
   return system_settings_form($form);
-}
-
-/**
- * Implements hook_permission().
- *
- */
-function gbif_publishers_permission() {
-  return array(
-    'access protected gbif publishers' => array(
-      'title' => t('Generate GBIF publishers JSON files through Drupal interface.'),
-    ),
-  );
-
 }
 
 /*
@@ -352,6 +331,7 @@ function _gbif_publishers_provider_info($table)
     $html = $table["stats_html"];
     $html .= '<div id="kingdom-chart" style="min-width: 500px; height: 400px; max-width: 300px; margin: 0 auto"></div>';
     $html .= '<div id="bor-chart"><b>Basis of records : </b></div></div></div> ';
+    $html .= ' <p>This map shows georeferenced data provided by  '.$table["institution_name"].'.</p><b>'.$percent_geo.' %</b> of these data are georeferenced. <br /><br />';
     $html .= '<div id="map" style="width: 748px; height: 400px"></div>';
  
     return $html;

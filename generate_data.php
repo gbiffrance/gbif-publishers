@@ -3,7 +3,7 @@ include_once("config.php");
 include_once("stats.php");
 
 
-// Generate a JSON file containing all publishers stats
+// Generate a JSON file containing all publishers stats 
 
 // Get all organizations endorsed by GBIF France
 // Loop through all organizations
@@ -16,11 +16,14 @@ include_once("stats.php");
 
 $exec_date = date("d/m/Y");
 
-$institutions = getInstitutions($gbiffr_key);
+
+echo "This script will generate two JSON files (1 for endorsed organization and 1 for datasets stats for each org.)  \n\n";
+echo "1st STEP : Fetch all organization endorsed  ... \n";
+$institutions = getInstitutions($node_key);
 write_file($organizationFile,$institutions);
 
 
-echo "2nd STEP : Fetch all datasets information for organization endorsed by GBIF France... \n";
+echo "2nd STEP : Fetch all datasets information for organization endorsed ... \n";
 $i = 1;
 $objInstitutions = json_decode($institutions);
 $total_element = count($objInstitutions->results);
@@ -42,9 +45,12 @@ foreach($objInstitutions->results as $k=>$v)
 
    array_push($datasets_list["datasets_list"],$institution);    
    $i++;
+   show_status($i, $total_element);
 }
 
 
 $json = json_encode($datasets_list);
 
 write_file($datasetFile,$json);
+
+?>
