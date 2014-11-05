@@ -37,7 +37,7 @@ function gbif_publishers_install (){
 }
 
 // Comments are for dev. version
-function gbif_publishers_disable()
+function gbif_publishers_uninstall()
 {
     $menu = array(
         'menu_name' => 'gbif-publishers-menu',
@@ -50,6 +50,11 @@ function gbif_publishers_disable()
     drupal_set_message($message = t('The module was successfully disabled '), $type = 'status');
 }
 
+function gbif_publishers_disable()
+{
+ cache_clear_all('*', 'cache_menu', TRUE);
+}
+
 /**
  * Implements hook_menu().
  */
@@ -59,7 +64,7 @@ function gbif_publishers_menu() {
   $json = file_get_contents( JSON_DIRECTORY . 'org.json' );
   $org =  json_decode($json);
 
-  $items['gbif_publishers'] = array(
+/*  $items['gbif_publishers'] = array(
     'title' => 'Data publishers list',
     'description' => '',
     'page callback' => '_gbif_publishers_page',
@@ -67,6 +72,7 @@ function gbif_publishers_menu() {
     'expanded' => TRUE,
     'menu_name'=> 'gbif-publishers-menu',
   );
+*/
    // Enables module configuration over Drupal admin interface
    $items['admin/config/content/gbif_publishers'] = array(
     'title' => 'GBIF Publishers',
