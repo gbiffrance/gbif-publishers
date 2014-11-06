@@ -15,7 +15,7 @@ Each providers has a page displaying :
 * 1 pie-chart with distribution of occurrences per kingdom:
 * Total occurrences count per BasisOfRecords ;
 
-Note that all data are retrieved one time from the API and then are read locally (due to performance issue when requesting GBIF API multiple time).
+Note that all data (except maps) are retrieved one time from the API and then are read locally (due to performance issue when requesting GBIF API multiple time).
 
 ## How-to use : step-by-step
 
