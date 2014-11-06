@@ -26,7 +26,7 @@ function gbif_publishers_help($path,$arg){
 function gbif_publishers_install (){
     $menu = array(
         'menu_name' => 'gbif-publishers-menu',
-        'title' => 'GBIF Providers menu',
+        'title' => 'GBIF publishers',
         'description' => 'Provides the list of gbif publishers'
     );
 
@@ -41,7 +41,7 @@ function gbif_publishers_uninstall()
 {
     $menu = array(
         'menu_name' => 'gbif-publishers-menu',
-        'title' => 'GBIF Providers menu',
+        'title' => 'GBIF publishers',
         'description' => 'Provides the list of gbif publishers'
     );
 
@@ -85,7 +85,7 @@ function gbif_publishers_menu() {
 
   foreach($org->results as $k=>$v)
   {
-    $routerUrl = 'gbif_publishers/display/' .  $v->key;
+    $routerUrl = 'gbif_publishers/datapublisher/' .  $v->key;
 
     $items[$routerUrl] = array(
          'title' => $v->title,
@@ -274,8 +274,6 @@ function _gbif_publishers_html_table($stat,$exec_date,$uuid)
     
     foreach($stat->datasets_list as $ds)
     { 
-   
-	
 	  $ds_url = "http://www.gbif.org/dataset/".$ds->key;
           $ds_search_url ="http://www.gbif.org/occurrence/search?datasetKey=".$ds->key;
 	  $html .= "<tr>";
@@ -331,14 +329,24 @@ function _gbif_publishers_provider_info($table)
 {
     $cpt_geo	= $table["total_geo"]  ;
     $cpt_occ = $table["total_occ"];
-    
-    $percent_geo =  round((($cpt_geo / $cpt_occ) * 100),2) ;
-    	    
-    $html = $table["stats_html"];
-    $html .= '<div id="kingdom-chart" style="min-width: 500px; height: 400px; max-width: 300px; margin: 0 auto"></div>';
-    $html .= '<div id="bor-chart"><b>Basis of records : </b></div></div></div> ';
-    $html .= ' <p>This map shows georeferenced data provided by  '.$table["institution_name"].'.</p><b>'.$percent_geo.' %</b> of these data are georeferenced. <br /><br />';
-    $html .= '<div id="map" style="width: 748px; height: 400px"></div>';
- 
+    $percent_geo = 0;
+    $html = '';
+    if ($cpt_occ != 0)
+    {
+    	$percent_geo =  round((($cpt_geo / $cpt_occ) * 100),2) ;	    
+        $html .= $table["stats_html"];
+        $html .= '<div id="kingdom-chart" style="min-width: 500px; height: 400px; max-width: 300px; margin: 0 auto"></div>';
+        $html .= '<div id="bor-chart"><b>Basis of records : </b></div></div></div> ';
+        if ($percent_geo != 0)
+        {
+          $html .= ' <p>This map shows georeferenced data provided by  '.$table["institution_name"].'.</p><b>'.$percent_geo.' %</b> of these data are georeferenced. <br /><br />';
+          $html .= '<div id="map" style="width: 748px; height: 400px"></div>';
+        }
+     }
+    else
+    {
+       $html .= 'This provider has no dataset indexed on GBIF portal.';
+    }
+
     return $html;
 }

@@ -1,6 +1,6 @@
 <?php 
-include_once("config.php");
-include_once("stats.php");
+include_once("config.inc");
+include_once("stats.inc");
 
 
 // Generate a JSON file containing all publishers stats 
